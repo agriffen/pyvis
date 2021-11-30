@@ -18,15 +18,14 @@ class NodeTestCase(unittest.TestCase):
         self.g.add_nodes([0, 1])
         self.assertTrue(1 in self.g.get_nodes())
         self.assertTrue(0 in self.g.get_nodes())
-        self.g.add_edge(0, 1)
-        self.assertTrue(self.g.get_edges()[
-                        0]["from"] == 0 and self.g.get_edges()[0]["to"] == 1)
+        self.g.add_edge(0, 1, '2')
+        self.assertTrue(self.g.get_edges()[0]["from"] == 0 and self.g.get_edges()[0]["to"] == 1 and self.g.get_edges()[0]["group"] == '2')
 
     def test_no_dup_edges(self):
         self.g.add_nodes([0, 1])
-        self.g.add_edge(0, 1)
+        self.g.add_edge(0, 1, '2')
         self.assertTrue(len(self.g.get_edges()) == 1)
-        self.g.add_edge(1, 0)
+        self.g.add_edge(1, 0, '2')
         self.assertTrue(len(self.g.get_edges()) == 1)
 
     def test_no_dup_nodes(self):
@@ -102,10 +101,10 @@ class NodeTestCase(unittest.TestCase):
     def test_neighbors(self):
         g = self.g
         g.add_nodes(range(5))
-        g.add_edge(0, 1)
-        g.add_edge(0, 2)
-        g.add_edge(1, 3)
-        g.add_edge(1, 4)
+        g.add_edge(0, 1, '2')
+        g.add_edge(0, 2, '2')
+        g.add_edge(1, 3, '2')
+        g.add_edge(1, 4, '2')
         self.assertEqual(g.neighbors(0), set([1, 2]))
 
     def test_length(self):
@@ -124,33 +123,33 @@ class EdgeTestCase(unittest.TestCase):
         self.g.add_nodes([0, 1, 2, 3])
 
     def test_non_existent_edge(self):
-        self.assertRaises(AssertionError, self.g.add_edge, 5, 1)
+        self.assertRaises(AssertionError, self.g.add_edge, 5, 1, '2')
         self.assertRaises(AssertionError, self.g.add_edge,
-                          "node1", "node2")
+                          "node1", "node2", '2')
 
     def test_no_edge_length(self):
         self.assertTrue(self.g.num_nodes() == 4)
         self.assertTrue(self.g.num_edges() == 0)
 
     def test_add_one_edge(self):
-        self.g.add_edge(0, 1)
+        self.g.add_edge(0, 1, '2')
         self.assertTrue(self.g.num_edges() == 1)
-        self.assertTrue({"from": 0, "to": 1} in self.g.edges)
+        self.assertTrue({"from": 0, "to": 1, "group": "2"} in self.g.edges)
 
     def test_add_two_edges_no_dups(self):
-        self.g.add_edge(0, 1)
-        self.g.add_edge(0, 1)
+        self.g.add_edge(0, 1, '2')
+        self.g.add_edge(0, 1, '2')
         self.assertTrue(self.g.num_edges() == 1)
-        self.g.add_edge(1, 2)
+        self.g.add_edge(1, 2, '2')
         self.assertTrue(self.g.num_edges() == 2)
-        self.assertEqual([{"from": 0, "to": 1},
-                          {"from": 1, "to": 2}],
+        self.assertEqual([{"from": 0, "to": 1, "group": "2"},
+                          {"from": 1, "to": 2, "group": "2"}],
                          self.g.edges)
 
     def test_add_edges_no_weights(self):
         self.g.add_edges(
             [
-                (0, 1), (0, 2), (0, 3), (1, 2), (1, 3), (2, 3)
+                (0, 1, '1'), (0, 2, '1'), (0, 3, '1'), (1, 2, '1'), (1, 3, '1'), (2, 3, '1')
             ]
         )
         self.assertEqual(self.g.num_edges(), 6)
@@ -164,8 +163,8 @@ class EdgeTestCase(unittest.TestCase):
     def test_add_edges_weights(self):
         self.g.add_edges(
             [
-                (0, 1, 1), (0, 2, 2), (0, 3, 3),
-                (1, 2, 4), (1, 3, 5), (2, 3, 6)
+                (0, 1, '1', 1), (0, 2, '1', 2), (0, 3, '1', 3),
+                (1, 2, '1',  4), (1, 3, '1', 5), (2, 3, '1', 6)
             ]
         )
         self.assertEqual(self.g.num_edges(), 6)
@@ -182,8 +181,8 @@ class EdgeTestCase(unittest.TestCase):
     def test_add_edges_mixed_weights(self):
         self.g.add_edges(
             [
-                (0, 1, 1), (0, 2), (0, 3, 3),
-                (1, 2), (1, 3, 5), (2, 3)
+                (0, 1, 1, '2'), (0, 2, '2'), (0, 3, 3, '2'),
+                (1, 2, '2'), (1, 3, 5, '2'), (2, 3, '2')
             ]
         )
         self.assertEqual(self.g.num_edges(), 6)
@@ -197,7 +196,7 @@ class EdgeTestCase(unittest.TestCase):
 
     def test_add_edge_directed(self):
         self.g.directed = True
-        self.g.add_edge(0, 1)
+        self.g.add_edge(0, 1, "2")
         self.assertTrue(self.g.edges)
         for e in self.g.edges:
             self.assertTrue(e["arrows"] == "to")
