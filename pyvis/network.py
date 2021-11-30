@@ -31,7 +31,9 @@ class Network(object):
                  bgcolor="#ffffff",
                  font_color=False,
                  layout=None,
-                 heading=""):
+                 heading="",
+                 color_scheme=None
+                 ):
         """
         :param height: The height of the canvas
         :param width: The width of the canvas
@@ -50,11 +52,14 @@ class Network(object):
         :type font_color: str
         :type layout: bool
         """
+        if color_scheme is None:
+            color_scheme = ['#820933', '#D84797', '#FFD685', '#3ABEFF', '#26FFE6', '#E59F71']
         self.nodes = []
         self.edges = []
         self.height = height
         self.width = width
         self.heading = heading
+        self.color_scheme = color_scheme
         self.html = ""
         self.shape = "dot"
         self.font_color = font_color
@@ -102,7 +107,7 @@ class Network(object):
         Node labels default to node ids if no label is specified during the
         call.
 
-        >>> nt = Network("500px", "500px")
+        >>> nt = Network("500px","500px")
         >>> nt.add_node(0, label="Node 0")
         >>> nt.add_node(1, label="Node 1", color = "blue")
 
@@ -388,6 +393,17 @@ class Network(object):
 
         >>> nodes, edges, heading, height, width, options = net.get_network_data()
         """
+        # TODO: Add a thing to stop there from being more groups than there are colors
+        # TODO: Probably turn this into a function to be called here and elsewhere
+        groups = []
+        for edge in self.edges:
+            groups.append(edge['group'])
+        # Turns groups into a set, and then back into a list, so that any duplicates are removed
+        keys = list(set(groups))
+        edge_colors = dict(zip(keys, self.color_scheme[:len(keys)]))
+        for edge in self.edges:
+            edge['color'] = edge_colors[edge['group']]
+
         if isinstance(self.options, dict):
             return (self.nodes, self.edges, self.heading, self.height,
                 self.width, json.dumps(self.options))
@@ -532,7 +548,7 @@ class Network(object):
 
         Usage:
 
-        >>> nt.Network("500px", "500px")
+        >>> nt.Network("500px","500px")
         >>> nt.from_DOT("test.dot")
         >>> nt.show("dot.html")
 
@@ -609,7 +625,7 @@ class Network(object):
         >>> nx_graph.add_node(21, size=15, title='couple', group=2)
         >>> nx_graph.add_edge(20,21,group,weight=5)
         >>> nx_graph.add_node(25, size=25, label='lonely', title='lonely node', group=3)
-        >>> nt = Network("500px", "500px")
+        >>> nt = Network("500px","500px")
         # populates the nodes and edges data structures
         >>> nt.from_nx(nx_graph)
         >>> nt.show("nx.html")
