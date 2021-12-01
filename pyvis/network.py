@@ -396,7 +396,7 @@ class Network(object):
         >>> nodes, edges, heading, height, width, options = net.get_network_data()
         """
         # TODO: Make adding a group optional
-        # Bake edge colors in:
+        # Add new edge colors
         self.set_groups_to_colors()
         if isinstance(self.options, dict):
             return (self.nodes, self.edges, self.heading, self.height,
@@ -936,12 +936,18 @@ class Network(object):
         self.options = self.options.set(options)
 
     def set_groups_to_colors(self):
+        """
+        Adds colors to the edges according to which groups they are a part of
+        """
+        # Get all of the groups from the edges
         groups = []
         for edge in self.edges:
             groups.append(edge['group'])
-        # Turns groups into a set, and then back into a list, so that duplicates are removed
+
+        # Turn the groups into a set, and then back into a list, so that duplicates are removed
         keys = list(set(groups))
         colors = self.color_scheme.copy()
+
         # If there are more groups than there are colors in the color scheme, generate more colors
         if len(keys) > len(self.color_scheme):
             warnings.warn('More groups than there are colors. Random colors will be generated, and they may look ugly.')
@@ -951,8 +957,11 @@ class Network(object):
                 shuffle(colors)
                 base_color = colors[0]
                 base_color = base_color[:-3] + str(randrange(0, 9)) + str(randrange(0, 9)) + str(randrange(0, 9))
+                # Add this to the list of new colors
                 new_colors.append(base_color)
+
             colors.extend(new_colors)
         edge_colors = dict(zip(keys, colors))
+        # Append the edge colors to each edge
         for edge in self.edges:
             edge['color'] = edge_colors[edge['group']]
