@@ -1,7 +1,7 @@
 ## Pyvis - a Python library for visualizing networks
-
 ![](pyvis/source/tut.gif?raw=true)
-
+## Fork info and description
+*This fork was created to implement the ability to sort edges into groups, and color them accordingly, for the purposes of visualisations within NLP.*
 ## Description
 Pyvis is built around [visjs](http://visjs.org/), a JavaScript visualization library.
 
@@ -37,7 +37,7 @@ from pyvis.network import Network
 g = Network()
 g.add_node(0)
 g.add_node(1)
-g.add_edge(0, 1)
+g.add_edge(0, 1, 'group')
 g.show("basic.html")
 ```
 

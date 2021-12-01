@@ -99,11 +99,19 @@ Assuming the network's nodes exist, the edges can then be added according to nod
 
    >>> net.add_node(0, label='a')
    >>> net.add_node(1, label='b')
-   >>> net.add_edge(0, 1)
+   >>> net.add_edge(0,1)
+
+Edges can contain a ``group`` attribute as well. This must be a string. If a group attribute is included, the edges will
+be colored according to this.
+
+   >>> net.add_node(0, label='a')
+   >>> net.add_node(1, label='b')
+   >>> net.add_edge(0,1,'group')
+
 
 Edges can contain a ``weight`` attribute as well
 
-   >>> net.add_edge(0, 1, weight=.87)
+   >>> net.add_edge(0,1,weight=.87)
 
 Edges can be customized and documentation on options can be found at
 :meth:`network.Network.add_edge` method documentation, or by referencing the
@@ -116,7 +124,7 @@ original VisJS edge_ module docs.
 
 An easy way  to visualize and construct pyvis networks is to use `Networkx <https://networkx.github.io>`_ 
 and use pyvis's built-in networkx helper method to translate the graph. Note that the
-Networkx node properties with the same names as those consumed by pyvis (e.g., ``title``)  are 
+Networkx node properties with the same names as those consumed by pyvis (e.g., ``title``)  are
 translated directly to the correspondingly-named pyvis node attributes.
 
    >>> from pyvis.network import Network
