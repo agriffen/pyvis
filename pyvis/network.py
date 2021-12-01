@@ -11,6 +11,8 @@ import networkx as nx
 import json
 import jsonpickle
 import os
+from random import shuffle, randrange
+import warnings
 
 
 class Network(object):
@@ -393,17 +395,9 @@ class Network(object):
 
         >>> nodes, edges, heading, height, width, options = net.get_network_data()
         """
-        # TODO: Add a thing to stop there from being more groups than there are colors
-        # TODO: Probably turn this into a function to be called here and elsewhere
-        groups = []
-        for edge in self.edges:
-            groups.append(edge['group'])
-        # Turns groups into a set, and then back into a list, so that any duplicates are removed
-        keys = list(set(groups))
-        edge_colors = dict(zip(keys, self.color_scheme[:len(keys)]))
-        for edge in self.edges:
-            edge['color'] = edge_colors[edge['group']]
-
+        # TODO: Make adding a group optional
+        # Bake edge colors in:
+        self.set_groups_to_colors()
         if isinstance(self.options, dict):
             return (self.nodes, self.edges, self.heading, self.height,
                 self.width, json.dumps(self.options))
@@ -940,3 +934,25 @@ class Network(object):
         :type options: str
         """
         self.options = self.options.set(options)
+
+    def set_groups_to_colors(self):
+        groups = []
+        for edge in self.edges:
+            groups.append(edge['group'])
+        # Turns groups into a set, and then back into a list, so that duplicates are removed
+        keys = list(set(groups))
+        colors = self.color_scheme.copy()
+        # If there are more groups than there are colors in the color scheme, generate more colors
+        if len(keys) > len(self.color_scheme):
+            warnings.warn('More groups than there are colors. Random colors will be generated, and they may look ugly.')
+            new_colors = []
+            for i in range(len(keys) - len(colors)):
+                # take a random color from the color scheme, and change the last 3 letters
+                shuffle(colors)
+                base_color = colors[0]
+                base_color = base_color[:-3] + str(randrange(0, 9)) + str(randrange(0, 9)) + str(randrange(0, 9))
+                new_colors.append(base_color)
+            colors.extend(new_colors)
+        edge_colors = dict(zip(keys, colors))
+        for edge in self.edges:
+            edge['color'] = edge_colors[edge['group']]
