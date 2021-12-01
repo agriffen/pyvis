@@ -24,3 +24,9 @@ pyvis/make.bat
 # vscode specific
 .vscode/
 venv
+
+# JetBrains specific
+.idea/
+
+# Apple specific
+.DS_Store

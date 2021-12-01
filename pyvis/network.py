@@ -11,6 +11,8 @@ import networkx as nx
 import json
 import jsonpickle
 import os
+from random import shuffle, randrange
+import warnings
 
 
 class Network(object):
@@ -31,7 +33,9 @@ class Network(object):
                  bgcolor="#ffffff",
                  font_color=False,
                  layout=None,
-                 heading=""):
+                 heading="",
+                 color_scheme=None
+                 ):
         """
         :param height: The height of the canvas
         :param width: The width of the canvas
@@ -50,11 +54,14 @@ class Network(object):
         :type font_color: str
         :type layout: bool
         """
+        if color_scheme is None:
+            color_scheme = ['#010045', '#820933', '#D84797', '#FFD685', '#3ABEFF', '#26FFE6', '#E59F71']
         self.nodes = []
         self.edges = []
         self.height = height
         self.width = width
         self.heading = heading
+        self.color_scheme = color_scheme
         self.html = ""
         self.shape = "dot"
         self.font_color = font_color
@@ -102,7 +109,7 @@ class Network(object):
         Node labels default to node ids if no label is specified during the
         call.
 
-        >>> nt = Network("500px", "500px")
+        >>> nt = Network("500px","500px")
         >>> nt.add_node(0, label="Node 0")
         >>> nt.add_node(1, label="Node 1", color = "blue")
 
@@ -281,15 +288,17 @@ class Network(object):
         """
         return len(self.edges)
 
-    def add_edge(self, source, to, **options):
+    def add_edge(self, source, to, group='None', **options):
         """
 
         Adding edges is done based off of the IDs of the nodes. Order does
         not matter unless dealing with a directed graph.
 
-        >>> nt.add_edge(0, 1) # adds an edge from node ID 0 to node ID
-        >>> nt.add_edge(0, 1, value = 4) # adds an edge with a width of 4
+        >>> nt.add_edge(0,1, 'group') # adds an edge from node ID 0 to node ID in group 'group'
+        >>> nt.add_edge(0,1, 'group', value=4) # adds an edge with a width of 4
 
+
+        :param group:  The group that the edge belongs to.
 
         :param arrowStrikethrough: When false, the edge stops at the arrow.
                                    This can be useful if you have thick lines
@@ -352,7 +361,7 @@ class Network(object):
                     edge_exists = True
 
         if not edge_exists:
-            e = Edge(source, to, self.directed, **options)
+            e = Edge(source, to, group, self.directed, **options)
             self.edges.append(e.options)
             
     def add_edges(self, edges):
@@ -369,10 +378,10 @@ class Network(object):
         """
         for edge in edges:
             # if incoming tuple contains a weight
-            if len(edge) == 3:
-                self.add_edge(edge[0], edge[1], width=edge[2])
+            if len(edge) == 4:
+                self.add_edge(edge[0], edge[1], edge[2], width=edge[3])
             else:
-                self.add_edge(edge[0], edge[1])
+                self.add_edge(edge[0], edge[1], edge[2])
 
     def get_network_data(self):
         """
@@ -387,6 +396,9 @@ class Network(object):
 
         >>> nodes, edges, heading, height, width, options = net.get_network_data()
         """
+
+        # Add new edge colors
+        self.set_groups_to_colors()
         if isinstance(self.options, dict):
             return (self.nodes, self.edges, self.heading, self.height,
                 self.width, json.dumps(self.options))
@@ -531,7 +543,7 @@ class Network(object):
 
         Usage:
 
-        >>> nt.Network("500px", "500px")
+        >>> nt.Network("500px","500px")
         >>> nt.from_DOT("test.dot")
         >>> nt.show("dot.html")
 
@@ -606,9 +618,9 @@ class Network(object):
         >>> nx_graph.nodes[3]['group'] = 10
         >>> nx_graph.add_node(20, size=20, title='couple', group=2)
         >>> nx_graph.add_node(21, size=15, title='couple', group=2)
-        >>> nx_graph.add_edge(20, 21, weight=5)
+        >>> nx_graph.add_edge(20,21,group,weight=5)
         >>> nx_graph.add_node(25, size=25, label='lonely', title='lonely node', group=3)
-        >>> nt = Network("500px", "500px")
+        >>> nt = Network("500px","500px")
         # populates the nodes and edges data structures
         >>> nt.from_nx(nx_graph)
         >>> nt.show("nx.html")
@@ -631,7 +643,7 @@ class Network(object):
                 if 'weight' not in e[2].keys():
                     e[2]['weight'] = default_edge_weight
                 e[2]['weight'] = edge_weight_transf(e[2]['weight'])
-                self.add_edge(e[0], e[1], **e[2])
+                self.add_edge(e[0], e[1], group, **e[2])
 
         for node in nx.isolates(nx_graph):
             if 'size' not in nodes[node].keys():
@@ -923,3 +935,34 @@ class Network(object):
         :type options: str
         """
         self.options = self.options.set(options)
+
+    def set_groups_to_colors(self):
+        """
+        Adds colors to the edges according to which groups they are a part of
+        """
+        # Get all of the groups from the edges
+        groups = []
+        for edge in self.edges:
+            groups.append(edge['group'])
+
+        # Turn the groups into a set, and then back into a list, so that duplicates are removed
+        keys = list(set(groups))
+        colors = self.color_scheme.copy()
+
+        # If there are more groups than there are colors in the color scheme, generate more colors
+        if len(keys) > len(self.color_scheme):
+            warnings.warn('More groups than there are colors. Random colors will be generated, and they may look ugly.')
+            new_colors = []
+            for i in range(len(keys) - len(colors)):
+                # take a random color from the color scheme, and change the last 3 letters
+                shuffle(colors)
+                base_color = colors[0]
+                base_color = base_color[:-3] + str(randrange(0, 9)) + str(randrange(0, 9)) + str(randrange(0, 9))
+                # Add this to the list of new colors
+                new_colors.append(base_color)
+
+            colors.extend(new_colors)
+        edge_colors = dict(zip(keys, colors))
+        # Append the edge colors to each edge
+        for edge in self.edges:
+            edge['color'] = edge_colors[edge['group']]
