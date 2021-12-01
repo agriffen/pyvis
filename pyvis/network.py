@@ -55,7 +55,7 @@ class Network(object):
         :type layout: bool
         """
         if color_scheme is None:
-            color_scheme = ['#820933', '#D84797', '#FFD685', '#3ABEFF', '#26FFE6', '#E59F71']
+            color_scheme = ['#010045', '#820933', '#D84797', '#FFD685', '#3ABEFF', '#26FFE6', '#E59F71']
         self.nodes = []
         self.edges = []
         self.height = height
@@ -288,7 +288,7 @@ class Network(object):
         """
         return len(self.edges)
 
-    def add_edge(self, source, to, group, **options):
+    def add_edge(self, source, to, group='None', **options):
         """
 
         Adding edges is done based off of the IDs of the nodes. Order does
@@ -299,6 +299,7 @@ class Network(object):
 
 
         :param group:  The group that the edge belongs to.
+
         :param arrowStrikethrough: When false, the edge stops at the arrow.
                                    This can be useful if you have thick lines
                                    and you want the arrow to end in a point.
@@ -395,7 +396,7 @@ class Network(object):
 
         >>> nodes, edges, heading, height, width, options = net.get_network_data()
         """
-        # TODO: Make adding a group optional
+
         # Add new edge colors
         self.set_groups_to_colors()
         if isinstance(self.options, dict):
