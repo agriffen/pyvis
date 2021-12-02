@@ -15,12 +15,6 @@ pyvis/test.py
 pyvis/full_graph.txt
 pyvis/source/stormofswords.csv
 
-# package details
-pyvis.egg-info/
-build/
-dist/
-pyvis/make.bat
-
 # vscode specific
 .vscode/
 venv
