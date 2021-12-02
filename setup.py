@@ -2,12 +2,10 @@ from setuptools import setup, find_packages
 
 exec(open('pyvis/_version.py').read())
 setup(
-    name="pyvis",
+    name="pyvis_agriffen_fork",
     version=__version__,
-    description="A Python network visualization library",
-    url="https://github.com/WestHealth/pyvis",
-    author="Giancarlo Perrone",
-    author_email="gperrone@westhealth.org",
+    description="A Python network visualization library, forked by agriffen",
+    url="https://github.com/agriffen/pyvis",
     license="BSD",
     packages=find_packages(),
     include_package_data=True,
