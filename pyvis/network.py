@@ -643,7 +643,7 @@ class Network(object):
                 if 'weight' not in e[2].keys():
                     e[2]['weight'] = default_edge_weight
                 e[2]['weight'] = edge_weight_transf(e[2]['weight'])
-                self.add_edge(e[0], e[1], group, **e[2])
+                self.add_edge(e[0], e[1], **e[2])
 
         for node in nx.isolates(nx_graph):
             if 'size' not in nodes[node].keys():
