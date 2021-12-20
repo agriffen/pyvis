@@ -947,6 +947,9 @@ class Network(object):
 
         # Turn the groups into a set, and then back into a list, so that duplicates are removed
         keys = list(set(groups))
+        # If only the default group is being used, don't use the colors.
+        if len(keys) == 1:
+            return
         colors = self.color_scheme.copy()
 
         # If there are more groups than there are colors in the color scheme, generate more colors
